@@ -14,7 +14,7 @@ public class itemSuspiciousTotem extends Item {
 	}
 
 	public ItemStack onUseItem(ItemStack itemstack, World world, EntityPlayer entityplayer) {
-		if( !((IWorldVariables)(world.getLevelData()) ).dxiimod$getFog() ) {
+		if( !((IWorldVariables)(world.getLevelData()) ).dxiimod$getFog() && dxii.dxiimod.dxiimodMain.THE_FOG == 1) {
 			world.sendGlobalMessage("Something irreversible happened...");
 
 			if (!world.isClientSide) {
@@ -26,6 +26,8 @@ public class itemSuspiciousTotem extends Item {
 			((IWorldVariables) (world.getLevelData())).dxiimod$setFogDay( (int)(world.getWorldTime() / 24000f) );
 
 			itemstack.consumeItem(entityplayer);
+		} else if (dxii.dxiimod.dxiimodMain.THE_FOG == 0) {
+            world.sendGlobalMessage("Nothing happened, it seems to be broken...");
 		}
 		return itemstack;
 	}

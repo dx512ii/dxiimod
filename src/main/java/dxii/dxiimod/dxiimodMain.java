@@ -43,21 +43,26 @@ public class dxiimodMain implements ModInitializer, GameStartEntrypoint, RecipeE
 
 	public static int ITEM_ID;
 	public static int ENTITY_ID;
+	public static int THE_FOG;
+	public static int MUST_BE_PLAYER;
 
-	static{
+	static {
 		Properties props = new Properties();
-		props.setProperty("starting_item_id", "12000");
+		props.setProperty("starting_item_id", "19000");
 		props.setProperty("starting_entity_id", "15000");
+		props.setProperty("thefog", "1");
+		props.setProperty("souls_only_from_player_kills", "1");
 		ConfigHandler config = new ConfigHandler(dxiimodMain.MOD_ID, props);
 		ITEM_ID = config.getInt("starting_item_id");
 		ENTITY_ID = config.getInt("starting_entity_id");
+		THE_FOG = config.getInt("thefog");
+		MUST_BE_PLAYER = config.getInt("souls_only_from_player_kills");
 		config.updateConfig();
 	}
 
     @Override
     public void onInitialize() {
 		LOGGER.debug("dxiimod is active!!!!!!");
-		new dxiimodItems().Initialize();
 
 		SoundHelper.addSound(MOD_ID, "foglurker_random1.ogg");
 		SoundHelper.addSound(MOD_ID, "foglurker_random2.ogg");
@@ -92,6 +97,8 @@ public class dxiimodMain implements ModInitializer, GameStartEntrypoint, RecipeE
 
 	@Override
 	public void beforeGameStart() {
+		dxiimodItems.Initialize();
+
 		EntityHelper.createEntity(EntityDagger.class, ENTITY_ID++, "dxiimod$stonedagger", RenderStoneDagger::new);
 		EntityHelper.createEntity(EntityTomahawk.class, ENTITY_ID++, "dxiimod$tomahawk", RenderTomahawk::new);
 		EntityHelper.createEntity(EnemyFogLurker.class, ENTITY_ID++, "dxiimod$foglurker1", RenderFogLurker1::new);

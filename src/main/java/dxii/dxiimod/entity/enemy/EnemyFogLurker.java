@@ -169,6 +169,7 @@ public class EnemyFogLurker extends EntityMonster {
 	//it spawns only if world meets requirements (fog)
 	@Override
 	public boolean getCanSpawnHere() {
+	    if (dxii.dxiimod.dxiimodMain.THE_FOG == 0) return false;
 		int z;
 		int y;
 		int x = MathHelper.floor_double(this.x);

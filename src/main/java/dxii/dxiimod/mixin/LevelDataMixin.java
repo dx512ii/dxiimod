@@ -22,7 +22,7 @@ public class LevelDataMixin implements IWorldVariables {
 
 	@Override
 	public boolean dxiimod$getFog(){
-		return this.isFog;
+		return this.isFog && dxii.dxiimod.dxiimodMain.THE_FOG == 1;
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class LevelDataMixin implements IWorldVariables {
 	)
 	public void readTagMixin(CompoundTag tag, CallbackInfo ci){
 		this.fogDay = tag.getInteger("FogDay");
-		this.isFog = tag.getBoolean("FogEnabled");
+		this.isFog = tag.getBoolean("FogEnabled") && dxii.dxiimod.dxiimodMain.THE_FOG == 1;
 	}
 
 

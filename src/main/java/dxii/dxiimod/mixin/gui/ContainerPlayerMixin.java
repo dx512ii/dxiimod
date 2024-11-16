@@ -19,7 +19,7 @@ public class ContainerPlayerMixin {
 
 	@Inject(
 		method = "<init>(Lnet/minecraft/core/player/inventory/InventoryPlayer;Z)V",
-		at = @At(value = "INVOKE", target = "net/minecraft/core/player/inventory/ContainerPlayer.addSlot (Lnet/minecraft/core/player/inventory/slot/Slot;)V")
+		at = @At(value = "INVOKE", target = "onCraftMatrixChanged")
 	)
 	public void newSlots(InventoryPlayer inventory, boolean isNotClientSide, CallbackInfo ci){
 		for (int i = 0; i < 4; ++i) {

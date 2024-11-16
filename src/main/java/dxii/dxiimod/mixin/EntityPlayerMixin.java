@@ -20,6 +20,7 @@ import net.minecraft.core.util.helper.MathHelper;
 import net.minecraft.core.util.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -28,8 +29,6 @@ import java.util.List;
 
 @Mixin(value = EntityPlayer.class, remap = false)
 public class EntityPlayerMixin implements IPlayerStuff {
-
-
 	/*
 	DODGINGG i guess
 	this mixin is all about accessories/rings, speed increase, also weapon animation variants
@@ -56,6 +55,11 @@ public class EntityPlayerMixin implements IPlayerStuff {
 
 	@Unique
 	public short animVar = 0;
+
+    @Shadow protected float baseSpeed;
+    @Shadow protected float baseFlySpeed;
+    @Unique public float oldDiffSpeed = 0;
+    @Unique public float oldDiffFlySpeed = 0;
 
 	@Override
 	public short dxiimod$getAnimVariant(){
@@ -185,9 +189,6 @@ public class EntityPlayerMixin implements IPlayerStuff {
 				dxiimodUtils.pushRelative(thisObject, -1, 0, dodgePower);
 				this.dodgeTimer = dodgeTimer;
 			}
-
-
-
 		}
 
 
@@ -215,15 +216,17 @@ public class EntityPlayerMixin implements IPlayerStuff {
 			this.lastSpeedModifier = 0;
 		}
 
-
-
+        this.baseSpeed -= oldDiffSpeed;
+        this.baseFlySpeed -= oldDiffFlySpeed;
 		if(speedy) {
-			((IAEntityPlayer) thisObject).setBaseSpeed(.125f - this.lastSpeedModifier);
-			((IAEntityPlayer) thisObject).setBaseFlySpeed(.025f - this.lastSpeedModifier*2/10);
+		    oldDiffSpeed = .075f - this.lastSpeedModifier;
+		    oldDiffFlySpeed = .075f - this.lastSpeedModifier*2/10;
 		}else{
-			((IAEntityPlayer) thisObject).setBaseSpeed(.1f - this.lastSpeedModifier);
-			((IAEntityPlayer) thisObject).setBaseFlySpeed(.02f - this.lastSpeedModifier*2/10);
+		    oldDiffSpeed = -this.lastSpeedModifier;
+		    oldDiffFlySpeed = -this.lastSpeedModifier*2/10;
 		}
+	    this.baseSpeed += oldDiffSpeed;
+	    this.baseFlySpeed += oldDiffFlySpeed;
 
 
 	}

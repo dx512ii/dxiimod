@@ -20,7 +20,7 @@ public class FogMixin {
 		at = @At(value = "FIELD", target = "net/minecraft/client/option/enums/RenderDistance.chunks : I")
 	)
 	private int mixinVar(RenderDistance instance){
-		if(Minecraft.getMinecraft(Minecraft.class).theWorld != null) {
+		if(Minecraft.getMinecraft(Minecraft.class).theWorld != null && dxii.dxiimod.dxiimodMain.THE_FOG == 1) {
 			double fogDay = ((IWorldVariables)(Minecraft.getMinecraft(Minecraft.class).theWorld.getLevelData() )).dxiimod$getFogDay();
 
 			if(((IWorldVariables)(Minecraft.getMinecraft(Minecraft.class).theWorld.getLevelData() )).dxiimod$getFog()) {

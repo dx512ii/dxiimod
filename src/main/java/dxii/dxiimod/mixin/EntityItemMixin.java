@@ -22,7 +22,7 @@ public class EntityItemMixin {
 		at = @At(value = "HEAD")
 	)
 	public void soulsNoGravity(CallbackInfo ci){
-
+        if (thisObject.item == null) return;
 		if(Objects.equals(thisObject.item.getItemKey(), "item.dxiimod.SOULPEACE")
 			|| Objects.equals(thisObject.item.getItemKey(), "item.dxiimod.SOULPEACEGREAT")
 			|| Objects.equals(thisObject.item.getItemKey(), "item.dxiimod.SOULEVIL")

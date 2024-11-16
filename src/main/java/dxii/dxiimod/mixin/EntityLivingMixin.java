@@ -476,20 +476,19 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 		at = @At(value = "TAIL"))
 	public void evilEyeAndSouls(Entity entityKilledBy, CallbackInfo ci) {
 
-		if(thisObject instanceof EntityMonster){
+		if(thisObject instanceof EntityMonster && (dxii.dxiimod.dxiimodMain.MUST_BE_PLAYER == 0 || entityKilledBy instanceof EntityPlayer)) {
 			if(Math.random() <= .5){
 				thisObject.spawnAtLocation(dxiimodItems.soulevil.id, 1);
 			}
 		}
 
-		if(thisObject instanceof EntityAnimal){
+		if(thisObject instanceof EntityAnimal && (dxii.dxiimod.dxiimodMain.MUST_BE_PLAYER == 0 || entityKilledBy instanceof EntityPlayer)) {
 			if(Math.random() <= .5){
 				thisObject.spawnAtLocation(dxiimodItems.soulpeace.id, 1);
 			}
 		}
 
 		//evil eye stuff
-
 		if(entityKilledBy instanceof EntityPlayer && this.evilEyeTimer == 0){
 			this.evilEyeTimer = 15;
 			boolean EE = false;
