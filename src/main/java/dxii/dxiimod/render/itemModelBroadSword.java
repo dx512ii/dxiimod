@@ -52,7 +52,7 @@ public class itemModelBroadSword extends ItemModelStandard {
 			attackDelay = ((IPlayerControllerStuff)pc).dxiimod$getAttackDelay();
 		}
 
-		short animVariant = ((IPlayerStuff)player).dxiimod$getAnimVariant();
+		short animVariant = ((IPlayerStuff)player).dxiimod$VMgetAnimVariant();
 
 		float scale = .5f;
 		GL11.glScalef(scale*.6f, scale, scale);

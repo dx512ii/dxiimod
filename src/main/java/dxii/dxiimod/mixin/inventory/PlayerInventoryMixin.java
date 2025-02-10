@@ -1,10 +1,11 @@
-package dxii.dxiimod.mixin.gui;
+package dxii.dxiimod.mixin.inventory;
 
 
 
 import com.mojang.nbt.CompoundTag;
 import com.mojang.nbt.ListTag;
 import dxii.dxiimod.interfaces.IPlayerInventory;
+import dxii.dxiimod.interfaces.IReinforceable;
 import dxii.dxiimod.item.enums.EAccBonus;
 import dxii.dxiimod.item.accessory.baseAccessory;
 import dxii.dxiimod.dxiimodItems;
@@ -37,8 +38,16 @@ public class PlayerInventoryMixin implements IPlayerInventory {
 
 
 	I MADE IT YIPEEEEEEEE
-	download nbt explorer if you want this system to be understandable
+	download nbt explorer if you want this system to be more understandable
 	 */
+
+//	@Inject(
+//		method ="insertItem(Lnet/minecraft/core/item/ItemStack;Z)V",
+//		at = @At(value = "HEAD")
+//	)
+//	public void upgradeFix(ItemStack stackToAdd, boolean useHotbarOffset, CallbackInfo ci){
+//		System.out.println( "insert reinforce = "+((IReinforceable)(Object)stackToAdd).dxiimod$getReinforcement() );
+//	}
 
 	/**
 	 * @author oooga

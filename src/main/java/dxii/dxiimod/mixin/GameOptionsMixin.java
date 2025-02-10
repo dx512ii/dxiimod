@@ -20,13 +20,17 @@ public class GameOptionsMixin {
 	public RangeOption FogDist;
 
 	@Unique
-	public KeyBinding keyDodge;
+	public KeyBinding
+		keyDodge;
+	@Unique
+	public KeyBinding keyParry;
 
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/b100/utils/ReflectUtils;getAllObjects(Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Object;)[Ljava/lang/Object;"))
 	public void addOptions(Minecraft minecraft, File file, CallbackInfo ci){
 		dxiimodMain.optionsInit((GameSettings) (Object)this);
 		this.FogDist = dxiimodMain.FogDist;
 		this.keyDodge = dxiimodMain.keyDodge;
+		this.keyParry = dxiimodMain.keyParry;
 	}
 
 

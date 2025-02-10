@@ -3,7 +3,9 @@ package dxii.dxiimod.item;
 import dxii.dxiimod.dxiimodUtils;
 import dxii.dxiimod.interfaces.INewItemFunctions;
 import dxii.dxiimod.interfaces.INewItemVars;
-import net.minecraft.core.HitResult;
+import dxii.dxiimod.item.enums.DamageInfo;
+import dxii.dxiimod.item.enums.EDamageTypeExtra;
+import dxii.dxiimod.item.enums.EUpgradeType;
 import net.minecraft.core.entity.EntityLiving;
 import net.minecraft.core.entity.player.EntityPlayer;
 import net.minecraft.core.item.Item;
@@ -13,10 +15,12 @@ import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
 
 
-public class ItemWeaponSpear extends Item implements INewItemFunctions {
+public class ItemWeaponSpear extends itemWeaponBase implements INewItemFunctions {
 
 	public float range;
-	public int damage = 4;
+	public int damage;
+	public DamageInfo dInfo = new DamageInfo();
+	public DamageInfo dInfo2 = new DamageInfo();
 
 
 	public ItemWeaponSpear(String name, int id, float range, int dmg, int cooldown, int durability) {
@@ -28,6 +32,17 @@ public class ItemWeaponSpear extends Item implements INewItemFunctions {
 		((INewItemVars)this).dxiimod$setItemSpeedPenalty(.012);
 		((INewItemVars)this).dxiimod$setDoesBreakBlocks(false);
 		this.setMaxDamage(durability);
+
+		dInfo.setDmg(this.damage);
+		dInfo.setDmgType(EDamageTypeExtra.THRUST);
+		dInfo.setKnockback(1.4);
+		dInfo.setIgnoresIframes(false);
+		dInfo.setIgnoresResistances(false);
+
+		this.upgradeType = EUpgradeType.DEFAULT;
+
+		dInfo2 = dInfo;
+		dInfo2.setIgnoresIframes(true);
 	}
 
 	@Override
@@ -40,17 +55,13 @@ public class ItemWeaponSpear extends Item implements INewItemFunctions {
 
 	@Override
 	public boolean dxiimod$onItemAttack(EntityPlayer player, ItemStack itemstack, boolean flag){
-		if(flag) {
-			dxiimodUtils.meleeAABBAttack(itemstack, player, this.damage, .2, 0, .5, .5,"", .1f, 1, 1, false);
-			dxiimodUtils.meleeAABBAttack(itemstack, player, this.damage, .2, 2*(this.range/4), .5, .5,"", .1f, 1, 1, true);
-			dxiimodUtils.meleeAABBAttack(itemstack, player, this.damage, .2, 3*(this.range/4), .5, .5,"", .1f, 1, 1, true);
-			dxiimodUtils.meleeAABBAttack(itemstack, player, this.damage, .2, this.range, .5, .5,"", .1f, 1, 1, true);
+		dInfo.setDmg( (int)( this.damage * getDamageMul(itemstack, player) ) );
 
-			HitResult eyeTrace = dxiimodUtils.quickEyeRayCast(player);
-			if(eyeTrace != null && eyeTrace.hitType == HitResult.HitType.TILE && dxiimodUtils.isHitBlockSolid(player, eyeTrace)){
-				player.world.spawnParticle("smoke", eyeTrace.location.xCoord, eyeTrace.location.yCoord, eyeTrace.location.zCoord, 0.0, 0.0, 0.0, 0);
-				player.world.playSoundAtEntity(player, player, "dxiimod.stab", 0.03F, 1F);
-			}
+		if(flag) {
+			dxiimodUtils.playerAABBAttack(itemstack, player, this.dInfo, 0, .3, .3, "", 1, 1, 1);
+			dxiimodUtils.playerAABBAttack(itemstack, player, this.dInfo, 2*(this.range/4), .3, .3, "", 1, 1, 1);
+			dxiimodUtils.playerAABBAttack(itemstack, player, this.dInfo, 3*(this.range/4), .3, .3, "", 1, 1, 1);
+			dxiimodUtils.playerAABBAttack(itemstack, player, this.dInfo2, this.range, .3, .3, "", 1, 1, 1);
 		}else{
 			player.swingItem();
 			player.world.playSoundAtEntity(player, player, "dxiimod.spear", 0.1F, 1F);
@@ -61,6 +72,11 @@ public class ItemWeaponSpear extends Item implements INewItemFunctions {
 
 	@Override
 	public boolean dxiimod$onItemAltAttackTimed(EntityPlayer player, ItemStack itemstack, boolean timed){
+		return false;
+	}
+
+	@Override
+	public boolean dxiimod$onItemParry(EntityPlayer player){
 		return false;
 	}
 

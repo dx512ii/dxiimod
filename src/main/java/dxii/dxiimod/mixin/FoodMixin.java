@@ -2,6 +2,7 @@ package dxii.dxiimod.mixin;
 
 
 
+import dxii.dxiimod.dxiimodUtils;
 import dxii.dxiimod.interfaces.IPlayerInventory;
 import dxii.dxiimod.item.enums.EAccBonus;
 import dxii.dxiimod.item.accessory.baseAccessory;
@@ -33,20 +34,7 @@ public class FoodMixin {
 			return;
 		}
 
-		boolean feral = false;
-
-		if(player instanceof EntityPlayer){
-			ItemStack[] accInv = ((IPlayerInventory)(((EntityPlayer)player).inventory)).dxiimod$getAccInv();
-			if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.FERALBONE) {
-				feral = true;
-			}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.FERALBONE) {
-				feral = true;
-			}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.FERALBONE) {
-				feral = true;
-			}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.FERALBONE) {
-				feral = true;
-			}
-		}
+		boolean feral = dxiimodUtils.playerHasAccessoryEffect((EntityPlayer)player, EAccBonus.FERALBONE);
 
 		//whoever made 90% of all variables in this class private - I hate you
 		((IAConsumedFood) thisObject).setTickCounter(((IAConsumedFood) thisObject).getTickCounter() + 1);

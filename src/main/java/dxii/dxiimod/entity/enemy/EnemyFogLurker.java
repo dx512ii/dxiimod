@@ -1,5 +1,6 @@
 package dxii.dxiimod.entity.enemy;
 
+import dxii.dxiimod.dxiimodUtils;
 import dxii.dxiimod.interfaces.IWorldVariables;
 import net.minecraft.core.block.Block;
 import net.minecraft.core.block.tag.BlockTags;
@@ -37,9 +38,9 @@ public class EnemyFogLurker extends EntityMonster {
 		this.attackStrength = 15;
 		this.entityToAttack = null;
 
-		if( !( ((IWorldVariables) (this.world.getLevelData())).dxiimod$getFog() ) || this.world.getWorldTime() / 24000f + .5 < ((IWorldVariables)(this.world.getLevelData())).dxiimod$getFogDay() + 1.4){
-			this.remove();
-		}
+//		if( !dxiimodUtils.isWorldFogged(this.world)){
+//			this.remove();
+//		}
 	}
 
 	@Override
@@ -61,6 +62,9 @@ public class EnemyFogLurker extends EntityMonster {
 		}
 
 		if(this.entityToAttack != null){
+			System.out.println("back: "+dxiimodUtils.isEntityBehind(this, (EntityLiving) this.entityToAttack));
+			System.out.println("is in front: "+dxiimodUtils.isEntityInFront((EntityLiving) this.entityToAttack, this));
+
 			if ( this.onGround && this.entityToAttack.distanceTo(this) < this.moveBoostDistTR1 && !(this.entityToAttack.distanceTo(this) < this.moveBoostDistTR2) ) {
 				double pushX = MathHelper.clamp(this.x - this.entityToAttack.x, -1, 1);
 				double pushZ = MathHelper.clamp(this.z - this.entityToAttack.z, -1, 1);
@@ -85,10 +89,10 @@ public class EnemyFogLurker extends EntityMonster {
 	}
 
 	public void searchForPlayers(){
-		if(this.findPlayerToAttack() == null){
-			return;
+		Entity foundPly = this.findPlayerToAttack();
+		if(foundPly != null && dxiimodUtils.isEntityInFront((EntityLiving) foundPly, this)) {
+			this.entityToAttack = foundPly;
 		}
-		this.entityToAttack = this.findPlayerToAttack();
 	}
 
 	public void getEntToAttack(){
@@ -176,8 +180,7 @@ public class EnemyFogLurker extends EntityMonster {
 		if (Block.blocksList[id] != null) {
 			return (Block.blocksList[id].hasTag(BlockTags.PASSIVE_MOBS_SPAWN) || id == Block.layerSnow.id)
 				&& this.world.getFullBlockLightValue(x, y, z) > 1
-				&& ((IWorldVariables) (this.world.getLevelData())).dxiimod$getFog()
-				&& this.world.getWorldTime() / 24000f + .5 > ((IWorldVariables)(this.world.getLevelData())).dxiimod$getFogDay() + 1.4
+				&& dxiimodUtils.isWorldFogged(this.world)
 				;
 		}
 		return false;

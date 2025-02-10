@@ -1,4 +1,4 @@
-package dxii.dxiimod.mixin.gui;
+package dxii.dxiimod.mixin.inventory;
 
 import dxii.dxiimod.gui.SlotAccessory;
 import dxii.dxiimod.mixin.accessors.IAContainerPlayer;
@@ -19,7 +19,7 @@ public class ContainerPlayerMixin {
 
 	@Inject(
 		method = "<init>(Lnet/minecraft/core/player/inventory/InventoryPlayer;Z)V",
-		at = @At(value = "INVOKE", target = "net/minecraft/core/player/inventory/ContainerPlayer.addSlot (Lnet/minecraft/core/player/inventory/slot/Slot;)V")
+		at = @At(value = "INVOKE", target = "net/minecraft/core/player/inventory/ContainerPlayer.onCraftMatrixChanged (Lnet/minecraft/core/player/inventory/IInventory;)V")
 	)
 	public void newSlots(InventoryPlayer inventory, boolean isNotClientSide, CallbackInfo ci){
 		for (int i = 0; i < 4; ++i) {

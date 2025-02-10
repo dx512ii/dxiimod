@@ -1,6 +1,7 @@
 package dxii.dxiimod.mixin;
 
 
+import dxii.dxiimod.dxiimodUtils;
 import dxii.dxiimod.interfaces.IPlayerInventory;
 import dxii.dxiimod.item.enums.EAccBonus;
 import dxii.dxiimod.item.accessory.baseAccessory;
@@ -23,20 +24,7 @@ public class PlayerRendererMixin {
 		at = @At(value = "HEAD")
 	)
 	private void transparencyMixin(EntityPlayer player, float f, CallbackInfo ci){
-		boolean invis = false;
-
-		ItemStack[] accInv = ((IPlayerInventory)(player.inventory)).dxiimod$getAccInv();
-		if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.INVIS) {
-			invis = true;
-		}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.INVIS) {
-			invis = true;
-		}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.INVIS) {
-			invis = true;
-		}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.INVIS) {
-			invis = true;
-		}
-
-		if(invis) {
+		if(dxiimodUtils.playerHasAccessoryEffect(player, EAccBonus.INVIS)) {
 			GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.1001f);
 		}
 		else{

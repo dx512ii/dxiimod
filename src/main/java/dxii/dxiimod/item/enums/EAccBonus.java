@@ -19,7 +19,7 @@ public enum EAccBonus {
 	FERALBONE, //+100% HEALING RATE -0.5 heart every 1 minute if not fed for 4 minutes
 	HAWKRING, //ARROW DAMAGE +3, ZOOM +50% (.45 -> .3)
 	HORNETRING, //HAWK RING +100% PARRY RIPOSTE DAMAGE
-	DODGESCARF,
+	DODGESCARF, //BOOSTS DODGING
 	FROGLEG, //100% HIGHER JUMPING, more blocks to fall to get damage
 	DROPRATE, //50% chance to get extra loot
 	FIREDEF, //50% FIRE RESISTANCE

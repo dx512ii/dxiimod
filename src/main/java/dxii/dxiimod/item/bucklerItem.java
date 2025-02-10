@@ -19,7 +19,7 @@ public class bucklerItem extends Item {
 
 	@Override
 	public ItemStack onUseItem(ItemStack itemstack, World world, EntityPlayer player) {
-		((ILivingEntityFunctions)player).dxiimod$Parry(20);
+		((ILivingEntityFunctions)player).dxiimod$Parry(3, 3,false);
 		return itemstack;
 	}
 

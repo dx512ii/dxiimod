@@ -1,4 +1,4 @@
-package dxii.dxiimod.mixin.gui;
+package dxii.dxiimod.mixin.inventory;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiInventory;

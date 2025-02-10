@@ -21,6 +21,7 @@ import net.minecraft.core.data.registry.Registries;
 import net.minecraft.core.entity.SpawnListEntry;
 import net.minecraft.core.enums.EnumCreatureType;
 import net.minecraft.core.world.biome.Biome;
+import org.lwjgl.input.Keyboard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import turniplabs.halplibe.helper.EntityHelper;
@@ -40,17 +41,21 @@ public class dxiimodMain implements ModInitializer, GameStartEntrypoint, RecipeE
 	public static OptionsPage optionsPage;
 	public static RangeOption FogDist;
 	public static KeyBinding keyDodge;
+	public static KeyBinding keyParry;
 
 	public static int ITEM_ID;
 	public static int ENTITY_ID;
+	public static boolean PLY_SOULS;
 
 	static{
 		Properties props = new Properties();
-		props.setProperty("starting_item_id", "12000");
+		props.setProperty("starting_item_id", "19000");
 		props.setProperty("starting_entity_id", "15000");
+		props.setProperty("only_ply_kills_drop_souls", "true");
 		ConfigHandler config = new ConfigHandler(dxiimodMain.MOD_ID, props);
 		ITEM_ID = config.getInt("starting_item_id");
 		ENTITY_ID = config.getInt("starting_entity_id");
+		PLY_SOULS = config.getBoolean("only_ply_kills_drop_souls");
 		config.updateConfig();
 	}
 
@@ -83,6 +88,7 @@ public class dxiimodMain implements ModInitializer, GameStartEntrypoint, RecipeE
 		SoundHelper.addSound(MOD_ID, "stab.ogg");
 		SoundHelper.addSound(MOD_ID, "iron_stone.ogg");
 		SoundHelper.addSound(MOD_ID, "break_ring.ogg");
+		SoundHelper.addSound(MOD_ID, "dodge.ogg");
 
 		for(Biome b : Registries.BIOMES){
 			b.getSpawnableList(EnumCreatureType.monster).add(new SpawnListEntry(EnemyFogLurker.class, 50));
@@ -110,18 +116,19 @@ public class dxiimodMain implements ModInitializer, GameStartEntrypoint, RecipeE
 			.withComponent(
 				new OptionsCategory(MOD_ID + ".category.fog")
 					.withComponent(new ToggleableOptionComponent<>(FogDist))
-			.withComponent(
+			).withComponent(
 				new OptionsCategory(MOD_ID + ".category.keybinds")
-					.withComponent(new KeyBindingComponent(keyDodge)) )
+					.withComponent(new KeyBindingComponent(keyDodge))
+					.withComponent(new KeyBindingComponent(keyParry))
 			);
-
 
 	}
 
 	public static void optionsInit(GameSettings gs){
-		//credits to big sir for conveniently showing me how to implement mod's own settings :troll
+		//credits to big sir for showing me how to implement mod's settings
 		FogDist = new RangeOption(gs, MOD_ID+ ".fog", 1, 7);
-		keyDodge = new KeyBinding(MOD_ID+ ".dodge").setDefault(InputDeviceKeyboard.keyboard, 56);
+		keyDodge = new KeyBinding(MOD_ID+ ".dodge").setDefault(InputDeviceKeyboard.keyboard, Keyboard.KEY_LMENU);
+		keyParry = new KeyBinding(MOD_ID+ ".parry").setDefault(InputDeviceKeyboard.keyboard, Keyboard.KEY_X);
 
 	}
 

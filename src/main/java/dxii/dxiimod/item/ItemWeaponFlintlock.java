@@ -72,4 +72,9 @@ public class ItemWeaponFlintlock extends Item implements INewItemFunctions {
 		return false;
 	}
 
+	@Override
+	public boolean dxiimod$onItemParry(EntityPlayer player){
+		return false;
+	}
+
 }

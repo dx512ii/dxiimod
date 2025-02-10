@@ -80,10 +80,10 @@ public class dxiimodItems {
 		single classes for every purpose, feels kinda over-
 		loaded
 		 */
-		stoneTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_stone").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("STONE_TOMAHAWK", dxiimodMain.ITEM_ID++, 4, 15, 3, 6, 7, ToolMaterial.stone) );
-		ironTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_iron").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("IRON_TOMAHAWK", dxiimodMain.ITEM_ID++, 8, 10, 3, 8, 9, ToolMaterial.iron) );
-		goldTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_gold").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("GOLD_TOMAHAWK", dxiimodMain.ITEM_ID++, 4, 8, 3, 8, 8, ToolMaterial.gold) );
-		diamondTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_diamond").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("DIAMOND_TOMAHAWK", dxiimodMain.ITEM_ID++, 4, 10, 3, 12, 12, ToolMaterial.diamond) );
+		stoneTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_stone").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("STONE_TOMAHAWK", dxiimodMain.ITEM_ID++, 1, 15, 3, 6, 7, ToolMaterial.stone) );
+		ironTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_iron").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("IRON_TOMAHAWK", dxiimodMain.ITEM_ID++, 1, 10, 3, 8, 9, ToolMaterial.iron) );
+		goldTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_gold").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("GOLD_TOMAHAWK", dxiimodMain.ITEM_ID++, 1, 8, 3, 8, 8, ToolMaterial.gold) );
+		diamondTomahawk = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/tomahawk_diamond").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemTomahawk("DIAMOND_TOMAHAWK", dxiimodMain.ITEM_ID++, 1, 10, 3, 12, 12, ToolMaterial.diamond) );
 
 		stoneHammer = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/hammer_stone").setItemModel(item -> new itemModelHammer(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemWeaponHammer("STONE_HAMMER", dxiimodMain.ITEM_ID++, 17, 2f, 17, 128) );
 		ironHammer = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/hammer_iron").setItemModel(item -> new itemModelHammer(item, dxiimodMain.MOD_ID).setFull3D()).build(new itemWeaponHammer("IRON_HAMMER", dxiimodMain.ITEM_ID++, 20, 2.4f, 18, 512) );
@@ -98,9 +98,9 @@ public class dxiimodItems {
 		diamondSpear = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/spear_diamond").setItemModel(item -> new itemModelSpear(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponSpear("DIAMOND_SPEAR", dxiimodMain.ITEM_ID++, 5, 12, 12, 512) );
 		steelSpear = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/spear_steel").setItemModel(item -> new itemModelSpear(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponSpear("STEEL_SPEAR", dxiimodMain.ITEM_ID++, 5, 10, 14, 4096) );
 
-		greatswordStone = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_stone").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("STONE_GREATSWORD", dxiimodMain.ITEM_ID++, 15, 4, 20, 128, .1) );
-		greatswordIron = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_iron").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("IRON_GREATSWORD", dxiimodMain.ITEM_ID++, 22, 4, 25, 384, .2) );
-		greatswordGold = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_gold").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("GOLD_GREATSWORD", dxiimodMain.ITEM_ID++, 20, 4,25, 256, 1) );
+		greatswordStone = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_stone").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("STONE_GREATSWORD", dxiimodMain.ITEM_ID++, 15, 4, 17, 128, .1) );
+		greatswordIron = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_iron").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("IRON_GREATSWORD", dxiimodMain.ITEM_ID++, 22, 4, 18, 384, .2) );
+		greatswordGold = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_gold").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("GOLD_GREATSWORD", dxiimodMain.ITEM_ID++, 20, 4,22, 256, 1) );
 		greatswordSteel = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/greatsword_steel").setItemModel(item -> new itemModelGreatSword(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponGreatsword("STEEL_GREATSWORD", dxiimodMain.ITEM_ID++, 20, 4,20, 4608, .2) );
 
 
@@ -137,8 +137,8 @@ public class dxiimodItems {
 
 		flameSpewer = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/flamespewer").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFull3D()).build(new ItemWeaponFlamespewer("FLAMESPEWER", dxiimodMain.ITEM_ID++) );
 
-		bullet_iron = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/bullet_iron").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFullBright()).build(new Item("BULLETIRON", dxiimodMain.ITEM_ID++).setMaxStackSize(16) );
-		bullet_steel = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/bullet_steel").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID).setFullBright()).build(new Item("BULLETSTEEL", dxiimodMain.ITEM_ID++).setMaxStackSize(16) );
+		bullet_iron = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/bullet_iron").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID)).build(new Item("BULLETIRON", dxiimodMain.ITEM_ID++).setMaxStackSize(16) );
+		bullet_steel = new ItemBuilder(dxiimodMain.MOD_ID).setIcon(dxiimodMain.MOD_ID + ":item/bullet_steel").setItemModel(item -> new ItemModelStandard(item, dxiimodMain.MOD_ID)).build(new Item("BULLETSTEEL", dxiimodMain.ITEM_ID++).setMaxStackSize(16) );
 	}
 
 }

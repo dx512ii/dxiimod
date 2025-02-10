@@ -11,8 +11,6 @@ import net.minecraft.core.player.gamemode.Gamemode;
 import net.minecraft.core.util.helper.Side;
 import net.minecraft.core.world.World;
 
-import static net.minecraft.core.util.helper.MathHelper.clamp;
-
 public class itemWeaponRapier extends Item {
 
 	public int damage;
@@ -28,7 +26,7 @@ public class itemWeaponRapier extends Item {
 	@Override
 	public boolean onBlockDestroyed(World world, ItemStack itemstack, int i, int j, int k, int l, Side side, EntityLiving entityliving) {
 		if( ((EntityPlayer)entityliving).gamemode != Gamemode.creative ) {
-			itemstack.damageItem(2, entityliving);
+			itemstack.damageItem(4, entityliving);
 		}
 		return true;
 	}
@@ -38,9 +36,14 @@ public class itemWeaponRapier extends Item {
 	}
 
 	public boolean hitEntity(ItemStack itemstack, EntityLiving entityliving, EntityLiving entityliving1) {
-		entityliving.xd = 0;
-		entityliving.yd = 0;
-		entityliving.zd = 0;
+		entityliving.xd *= .33;
+		entityliving.yd *= .33;
+		entityliving.zd *= .33;
+
+		int oldFlash = entityliving.heartsFlashTime;
+
+		entityliving.heartsFlashTime = 0;
+
 		if( ((EntityPlayer)entityliving1).gamemode != Gamemode.creative ){
 			itemstack.damageItem(1, entityliving1);
 		}

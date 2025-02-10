@@ -43,7 +43,7 @@ public class EntityHook extends EntityProjectile {
 				this.lastRoty = this.yRot;
 				this.world.playBlockSoundEffect(this, this.x, this.y, this.z, hitBlock, EnumBlockSoundEffectType.ENTITY_LAND);
 				if(hitBlock.blockMaterial == Material.metal || hitBlock.blockMaterial == Material.stone){
-					world.playSoundAtEntity(this.owner, this, "dxiimod.iron_stone", 0.25F, (float)(Math.random()/5 + .4) );
+					world.playSoundAtEntity(this.owner, this, "dxiimod.iron_stone", 0.1F, (float)(Math.random()/5 + .4) );
 				}
 			}
 		}

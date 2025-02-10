@@ -51,7 +51,7 @@ public class itemModelGreatSword extends ItemModelStandard {
 			PlayerController pc = Minecraft.getMinecraft(Minecraft.class).playerController;
 			attackDelay = ((IPlayerControllerStuff)pc).dxiimod$getAttackDelay();
 		}
-		short animVariant = ((IPlayerStuff)player).dxiimod$getAnimVariant();
+		short animVariant = ((IPlayerStuff)player).dxiimod$VMgetAnimVariant();
 		float scale = .5f;
 		GL11.glScalef(scale*.6f, scale, scale);
 
@@ -62,13 +62,12 @@ public class itemModelGreatSword extends ItemModelStandard {
 		float animationProgress3 = MathHelper.sin(swingProgress * swingProgress * (float)Math.PI);
 
 		if(animVariant == 3) {
-			GL11.glTranslatef(-animationProgress * 3, MathHelper.sin(MathHelper.sqrt_float(swingProgress) * (float)Math.PI * 2.0f) * -0.3f - 1, animationProgress3*-2f -.6f);
+			GL11.glTranslatef(-animationProgress * 3, MathHelper.sin(MathHelper.sqrt_float(swingProgress) * (float)Math.PI * 2.0f) * -0.3f - 1, animationProgress*-2f -.6f);
 			GL11.glTranslatef(3f, -0.52f - (1.0f - renderer.getEquippedProgress(partialTick)) * 0.6f - (float) attackDelay / 25, -2-animationProgress2);
 
 			GL11.glEnable(32826);
-			GL11.glRotatef(animationProgress * 90, 0.0f, 0f, 1f);
-			GL11.glRotatef(animationProgress2*-125, 1.0f, -0.0f, 0.0f);
-			GL11.glRotatef(animationProgress * -10, 1.0f, .0f, 1.0f);
+			GL11.glRotatef(animationProgress*-125, 1.0f, -0.0f, 0.0f);
+			GL11.glRotatef(animationProgress2 * 10, 1.0f, .0f, 1.0f);
 			GL11.glRotatef(30, 0.0f, 1.0f, 0.0f);
 			GL11.glRotatef(15, 1.0f, 0.0f, 0.0f);
 		}

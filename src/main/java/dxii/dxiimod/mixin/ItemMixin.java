@@ -39,6 +39,11 @@ public class ItemMixin implements INewItemVars, INewItemFunctions {
 	}
 
 	@Override
+	public boolean dxiimod$onItemParry(EntityPlayer player){
+		return false;
+	}
+
+	@Override
 	public boolean dxiimod$doesBreakBlocks(){
 		return this.itemBreaksBlocks;
 	}

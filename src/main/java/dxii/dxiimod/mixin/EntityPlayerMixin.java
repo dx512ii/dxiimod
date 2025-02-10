@@ -5,23 +5,26 @@ import dxii.dxiimod.dxiimodMain;
 import dxii.dxiimod.dxiimodUtils;
 import dxii.dxiimod.interfaces.ILivingEntityFunctions;
 import dxii.dxiimod.interfaces.INewItemVars;
-import dxii.dxiimod.interfaces.IPlayerInventory;
 import dxii.dxiimod.interfaces.IPlayerStuff;
 import dxii.dxiimod.item.enums.EAccBonus;
-import dxii.dxiimod.item.accessory.baseAccessory;
 import dxii.dxiimod.mixin.accessors.IAEntityPlayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.entity.Entity;
+import net.minecraft.core.entity.EntityLiving;
 import net.minecraft.core.entity.monster.EntityMonster;
 import net.minecraft.core.entity.player.EntityPlayer;
 import net.minecraft.core.item.Item;
-import net.minecraft.core.item.ItemStack;
+import net.minecraft.core.player.gamemode.Gamemode;
+import net.minecraft.core.sound.SoundCategory;
+import net.minecraft.core.util.helper.DamageType;
 import net.minecraft.core.util.helper.MathHelper;
 import net.minecraft.core.util.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -46,6 +49,12 @@ public class EntityPlayerMixin implements IPlayerStuff {
 	public int dodgeTimer = 0;
 
 	@Unique
+	public int dodgeDelay = 20;
+
+	@Unique
+	public int dodgeSoundTimer = 0;
+
+	@Unique
 	public int redeyeTimer = 0;
 
 	@Unique
@@ -57,13 +66,36 @@ public class EntityPlayerMixin implements IPlayerStuff {
 	@Unique
 	public short animVar = 0;
 
+	@Unique
+	public float oldBBWidth = thisObject.bbWidth;
+
+	@Unique
+	public float oldBBHeight = thisObject.bbHeight;
+
+	@Unique
+	public DamageType lastDMGType;
+
+	@Unique
+	public EntityLiving lastAtkEntity;
+
+	@Unique
+	public int lastDMG;
+
+	@Unique
+	public int feralCurse = 0;
+
+	@Unique
+	public int feralCurseSatiety = 0;
+
+
+
 	@Override
-	public short dxiimod$getAnimVariant(){
+	public short dxiimod$VMgetAnimVariant(){
 		return this.animVar;
 	}
 
 	@Override
-	public void dxiimod$switchAnimVariant(){
+	public void dxiimod$VMswitchAnimVariant(){
 		if(this.animVar == 0) {
 			this.animVar = 1;
 		}else {
@@ -72,8 +104,18 @@ public class EntityPlayerMixin implements IPlayerStuff {
 	}
 
 	@Override
-	public void dxiimod$setSpecialAnimVariant(){
+	public void dxiimod$VMsetSpecialAnimVariant(){
 		this.animVar = 3;
+	}
+
+
+
+	@Inject(
+		method ="attackTargetEntityWithCurrentItem(Lnet/minecraft/core/entity/Entity;)V",
+		at = @At(value = "HEAD")
+	)
+	public void getAtkLocals(Entity entity, CallbackInfo ci){
+		this.lastAtkEntity = (EntityLiving)entity;
 	}
 
 	@ModifyArg(
@@ -84,36 +126,15 @@ public class EntityPlayerMixin implements IPlayerStuff {
 	private int atkDamageMixin(int dmg){
 		int newDmg = dmg;
 
-		boolean rtsr = false;
-		boolean hornet = false;
-
-		ItemStack[] accInv = ((IPlayerInventory)(thisObject.inventory)).dxiimod$getAccInv();
-		if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.HORNETRING) {
-			hornet = true;
-		}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.HORNETRING) {
-			hornet = true;
-		}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.HORNETRING) {
-			hornet = true;
-		}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.HORNETRING) {
-			hornet = true;
-		}
-
-		if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.RTSR) {
-			rtsr = true;
-		}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.RTSR) {
-			rtsr = true;
-		}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.RTSR) {
-			rtsr = true;
-		}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.RTSR) {
-			rtsr = true;
-		}
+		boolean rtsr = dxiimodUtils.playerHasAccessoryEffect(thisObject, EAccBonus.RTSR);;
+		boolean hornet = dxiimodUtils.playerHasAccessoryEffect(thisObject, EAccBonus.HORNETRING);;
 
 
 		if(rtsr & thisObject.getHealth() <= 4){
 			newDmg *= 2;
 		}
 
-		if( ((ILivingEntityFunctions)(thisObject)).dxiimod$getParryTicks() > 0 ){
+		if( ((ILivingEntityFunctions)(lastAtkEntity)).dxiimod$getParriedTicks() > 0 ){
 			if(hornet){
 				newDmg *= 3;
 			}else{
@@ -124,41 +145,85 @@ public class EntityPlayerMixin implements IPlayerStuff {
 		return newDmg;
 	}
 
+	@Redirect(
+		method = "push(Lnet/minecraft/core/entity/Entity;)V",
+		at = @At(value = "FIELD", target = "net/minecraft/core/entity/player/EntityPlayer.noPhysics : Z")
+	)
+	public boolean canBePushed(EntityPlayer player){
+		return thisObject.noPhysics || this.dodgeTimer >= dodgeDelay - 5;
+	}
 
+	@Inject(
+		method = "hurt(Lnet/minecraft/core/entity/Entity;ILnet/minecraft/core/util/helper/DamageType;)Z",
+		at = @At(value = "HEAD")
+	)
+	public void getLastDmgType(Entity attacker, int damage, DamageType type, CallbackInfoReturnable<Boolean> cir){
+		this.lastDMGType = type;
+		this.lastDMG = damage;
+	}
+
+	@Redirect(
+		method = "hurt(Lnet/minecraft/core/entity/Entity;ILnet/minecraft/core/util/helper/DamageType;)Z",
+		at = @At(value = "INVOKE", target = "net/minecraft/core/player/gamemode/Gamemode.isPlayerInvulnerable ()Z")
+	)
+	public boolean dodgeImmunity(Gamemode instance){
+		if(this.dodgeSoundTimer == 0 && this.dodgeTimer >= (dodgeDelay - 3) && (lastDMGType == DamageType.COMBAT || lastDMGType == DamageType.BLAST || lastDMGType == DamageType.FALL ) ){
+			this.dodgeSoundTimer = 3;
+			thisObject.world.playSoundEffect(thisObject, SoundCategory.ENTITY_SOUNDS, thisObject.x, thisObject.y, thisObject.z, "dxiimod.dodge", MathHelper.clamp(this.lastDMG/100f, 0.02f, 0.3f), (float)(1 - Math.random()/5 ) );
+		}
+
+		return thisObject.gamemode.isPlayerInvulnerable() || (this.dodgeTimer >= (dodgeDelay - 3) && this.lastDMG < thisObject.getHealth() && (lastDMGType == DamageType.COMBAT || lastDMGType == DamageType.BLAST || lastDMGType == DamageType.FALL ) );
+	}
 
 	@Inject(
 		method = "onLivingUpdate()V",
 		at = @At(value = "HEAD")
 	)
-	public void speedMixin(CallbackInfo ci){
-		boolean speedy = false;
-
-		ItemStack[] accInv = ((IPlayerInventory)(thisObject.inventory)).dxiimod$getAccInv();
-		if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.CLORANTHY) {
-			speedy = true;
-		}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.CLORANTHY) {
-			speedy = true;
-		}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.CLORANTHY) {
-			speedy = true;
-		}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.CLORANTHY) {
-			speedy = true;
+	public void tickMixin(CallbackInfo ci){
+		//hungry curse yum yum
+		if( dxiimodUtils.playerHasAccessoryEffect(thisObject, EAccBonus.FERALBONE) ){
+			this.feralCurse = 24000;
+			if(this.feralCurseSatiety == 0){
+				this.feralCurseSatiety = 2400;
+			}
+		}else if(this.feralCurse > 0){
+			System.out.println("remaining curse: " + this.feralCurse);
+			--this.feralCurse;
+		}
+		if(this.feralCurseSatiety > 0){
+			System.out.println("remaining curse satiety: " + this.feralCurseSatiety);
+			--this.feralCurseSatiety;
+		}
+		//tummy is hungry(((
+		if(this.feralCurse > 0 && this.feralCurseSatiety == 0){
+			thisObject.hurt(null, 1, DamageType.GENERIC);
+			this.feralCurseSatiety = 720;
 		}
 
-		if(this.dodgeTimer == 0 && dxiimodMain.keyDodge.isPressed()){
-			float dodgePower = .66f;
+
+		if(this.dodgeTimer >= this.dodgeDelay * 0.75){
+			thisObject.bbWidth = .01f;
+		}else{
+			thisObject.bbWidth = this.oldBBWidth;
+		}
+
+		boolean speedy = dxiimodUtils.playerHasAccessoryEffect(thisObject, EAccBonus.CLORANTHY);
+		boolean parrying = ((ILivingEntityFunctions)thisObject).dxiimod$getParryTicks() > 0;
+
+		if(!parrying && this.dodgeTimer == 0 && dxiimodMain.keyDodge.isPressed()){
+			float dodgePower = .75f;
 
 			if(!thisObject.onGround){
 				dodgePower *= .66f;
 			}
 
-			int dodgeTimer = 20;
 			float dodgeJump = .0f;
 
 			if(this.mc.gameSettings.keyForward.isPressed() && this.mc.gameSettings.keyLeft.isPressed()
 			|| this.mc.gameSettings.keyForward.isPressed() && this.mc.gameSettings.keyRight.isPressed()
 			|| this.mc.gameSettings.keyBack.isPressed() && this.mc.gameSettings.keyLeft.isPressed()
 			|| this.mc.gameSettings.keyBack.isPressed() && this.mc.gameSettings.keyRight.isPressed()){
-				dodgePower /= 1.5f;
+				dodgePower *= .66f;
 			}
 
 			if(
@@ -170,26 +235,27 @@ public class EntityPlayerMixin implements IPlayerStuff {
 			}
 
 			if(this.mc.gameSettings.keyForward.isPressed()) {
-				dxiimodUtils.pushRelative(thisObject, 0, 1, dodgePower);
-				this.dodgeTimer = dodgeTimer;
+				dxiimodUtils.setVelRelative(thisObject, 0, 1, dodgePower);
+				this.dodgeTimer = this.dodgeDelay;
 			}
 			if(this.mc.gameSettings.keyBack.isPressed()) {
-				dxiimodUtils.pushRelative(thisObject, 0, -1, dodgePower);
-				this.dodgeTimer = dodgeTimer;
+				dxiimodUtils.setVelRelative(thisObject, 0, -1, dodgePower);
+				this.dodgeTimer = this.dodgeDelay;
 			}
 			if(this.mc.gameSettings.keyLeft.isPressed()){
-				dxiimodUtils.pushRelative(thisObject, 1, 0, dodgePower);
-				this.dodgeTimer = dodgeTimer;
+				dxiimodUtils.setVelRelative(thisObject, 1, 0, dodgePower);
+				this.dodgeTimer = this.dodgeDelay;
 			}
 			if(this.mc.gameSettings.keyRight.isPressed()){
-				dxiimodUtils.pushRelative(thisObject, -1, 0, dodgePower);
-				this.dodgeTimer = dodgeTimer;
+				dxiimodUtils.setVelRelative(thisObject, -1, 0, dodgePower);
+				this.dodgeTimer = this.dodgeDelay;
 			}
-
-
 
 		}
 
+		if(this.dodgeSoundTimer != 0) {
+			this.dodgeSoundTimer--;
+		}
 
 		if(this.dodgeTimer != 0) {
 			this.dodgeTimer--;
@@ -215,13 +281,11 @@ public class EntityPlayerMixin implements IPlayerStuff {
 			this.lastSpeedModifier = 0;
 		}
 
-
-
 		if(speedy) {
-			((IAEntityPlayer) thisObject).setBaseSpeed(.125f - this.lastSpeedModifier);
+			((IAEntityPlayer) thisObject).setBaseSpeed(parrying ? 0.01f : .125f - this.lastSpeedModifier);
 			((IAEntityPlayer) thisObject).setBaseFlySpeed(.025f - this.lastSpeedModifier*2/10);
 		}else{
-			((IAEntityPlayer) thisObject).setBaseSpeed(.1f - this.lastSpeedModifier);
+			((IAEntityPlayer) thisObject).setBaseSpeed(parrying ? 0.01f : .1f - this.lastSpeedModifier);
 			((IAEntityPlayer) thisObject).setBaseFlySpeed(.02f - this.lastSpeedModifier*2/10);
 		}
 
@@ -237,18 +301,7 @@ public class EntityPlayerMixin implements IPlayerStuff {
 			redeyeTimer--;
 		}
 
-		boolean redeye = false;
-
-		ItemStack[] accInv = ((IPlayerInventory)(thisObject.inventory)).dxiimod$getAccInv();
-		if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.REDEYE) {
-			redeye = true;
-		}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.REDEYE) {
-			redeye = true;
-		}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.REDEYE) {
-			redeye = true;
-		}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.REDEYE) {
-			redeye = true;
-		}
+		boolean redeye = dxiimodUtils.playerHasAccessoryEffect(thisObject, EAccBonus.REDEYE);
 
 		int bound = 32;
 
@@ -281,6 +334,24 @@ public class EntityPlayerMixin implements IPlayerStuff {
 			}
 		}
 
+	}
+
+	/**
+	 * @author aa
+	 * @reason ss
+	 */
+	@Overwrite
+	public void updatePlayerActionState() {
+		if (thisObject.isSwinging) {
+			++thisObject.swingProgressInt;
+			if (thisObject.swingProgressInt >= 10) {
+				thisObject.swingProgressInt = 0;
+				thisObject.isSwinging = false;
+			}
+		} else {
+			thisObject.swingProgressInt = 0;
+		}
+		thisObject.swingProgress = (float)thisObject.swingProgressInt / 10;
 	}
 
 }

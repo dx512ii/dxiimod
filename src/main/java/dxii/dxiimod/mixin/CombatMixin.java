@@ -1,5 +1,6 @@
 package dxii.dxiimod.mixin;
 
+import dxii.dxiimod.dxiimodMain;
 import dxii.dxiimod.interfaces.INewItemFunctions;
 import dxii.dxiimod.interfaces.INewItemVars;
 import dxii.dxiimod.interfaces.IPlayerControllerStuff;
@@ -116,14 +117,14 @@ public class CombatMixin implements IPlayerControllerStuff {
 			if(this.mc.thePlayer.getHeldItem() != null) {
 				Item currentItem = this.mc.thePlayer.getHeldItem().getItem();
 				if (((INewItemFunctions) currentItem).dxiimod$onItemAttack(this.mc.thePlayer, this.mc.thePlayer.getHeldItem(), false)) {
-					((IPlayerStuff)this.mc.thePlayer).dxiimod$switchAnimVariant();
+					((IPlayerStuff)this.mc.thePlayer).dxiimod$VMswitchAnimVariant();
 					return true;
 				} else {
 					this.swingCooldown = ((INewItemVars) currentItem).dxiimod$getItemCooldown();
 					this.attackCooldown = ((INewItemVars) currentItem).dxiimod$getItemCooldown();
 					this.lastAttackCooldown = ((INewItemVars) currentItem).dxiimod$getItemCooldown();
 					this.lastAltAttackCooldown = 0;
-					((IPlayerStuff)this.mc.thePlayer).dxiimod$switchAnimVariant();
+					((IPlayerStuff)this.mc.thePlayer).dxiimod$VMswitchAnimVariant();
 					return false;
 				}
 			}
@@ -176,7 +177,7 @@ public class CombatMixin implements IPlayerControllerStuff {
 				this.mc.thePlayer.swingItem();
 				this.swingCooldown = 5;
 
-				((IPlayerStuff)this.mc.thePlayer).dxiimod$switchAnimVariant();
+				((IPlayerStuff)this.mc.thePlayer).dxiimod$VMswitchAnimVariant();
 				return true;
 			}
 		}
@@ -217,26 +218,39 @@ public class CombatMixin implements IPlayerControllerStuff {
 		at = @At(value = "INVOKE", target = "net/minecraft/client/player/controller/PlayerController.syncCurrentPlayItem ()V")
 	)
 	private void attackDelayMixin(CallbackInfo ci){
+
+		if(this.mc.thePlayer.getHeldItem() != null && this.mc.thePlayer.getHeldItem().getItem() != null) {
+			Item currentItem = this.mc.thePlayer.getHeldItem().getItem();
+
+			if (this.attackCooldown == 0
+				&& dxiimodMain.keyParry.isPressed()
+				&& currentItem != null) {
+
+				if( ((INewItemFunctions) currentItem).dxiimod$onItemParry(this.mc.thePlayer) ) {
+					this.swingCooldown = ((INewItemVars) currentItem).dxiimod$getItemCooldown();
+					this.attackCooldown = ((INewItemVars) currentItem).dxiimod$getItemCooldown();
+				}
+			}
+
+			if (this.attackCooldown == (this.lastAttackCooldown - 2) ) {
+				if(currentItem != null){
+					((INewItemFunctions) currentItem).dxiimod$onItemAttack(this.mc.thePlayer, this.mc.thePlayer.getHeldItem(), true);
+				}
+			}
+
+			if (this.attackCooldown == (this.lastAltAttackCooldown - 2) ) {
+				if(currentItem != null){
+					((INewItemFunctions) currentItem).dxiimod$onItemAltAttackTimed(this.mc.thePlayer, this.mc.thePlayer.getHeldItem(), true);
+				}
+			}
+		}
+
 		if (this.attackCooldown > 0) {
 			--this.attackCooldown;
 		}
 
 		if (this.usageCooldown > 0) {
 			--this.usageCooldown;
-		}
-
-		if (this.attackCooldown == (this.lastAttackCooldown - 2) ) {
-			if(this.mc.thePlayer.getHeldItem() != null){
-				Item currentItem = this.mc.thePlayer.getHeldItem().getItem();
-				((INewItemFunctions) currentItem).dxiimod$onItemAttack(this.mc.thePlayer, this.mc.thePlayer.getHeldItem(), true);
-			}
-		}
-
-		if (this.attackCooldown == (this.lastAltAttackCooldown - 2) ) {
-			if(this.mc.thePlayer.getHeldItem() != null){
-				Item currentItem = this.mc.thePlayer.getHeldItem().getItem();
-				((INewItemFunctions) currentItem).dxiimod$onItemAltAttackTimed(this.mc.thePlayer, this.mc.thePlayer.getHeldItem(), true);
-			}
 		}
 	}
 

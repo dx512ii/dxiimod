@@ -2,11 +2,10 @@ package dxii.dxiimod.mixin;
 
 
 
+import dxii.dxiimod.dxiimodMain;
 import dxii.dxiimod.dxiimodUtils;
 import dxii.dxiimod.interfaces.ILivingEntityFunctions;
-import dxii.dxiimod.interfaces.IPlayerInventory;
 import dxii.dxiimod.item.enums.EAccBonus;
-import dxii.dxiimod.item.accessory.baseAccessory;
 import dxii.dxiimod.mixin.accessors.IAEntity;
 import dxii.dxiimod.mixin.accessors.IAEntityLiving;
 import net.minecraft.client.Minecraft;
@@ -16,14 +15,9 @@ import net.minecraft.core.entity.animal.EntityAnimal;
 import net.minecraft.core.entity.monster.EntityMonster;
 import net.minecraft.core.entity.player.EntityPlayer;
 import dxii.dxiimod.dxiimodItems;
-import net.minecraft.core.entity.projectile.EntityArrow;
-import net.minecraft.core.entity.projectile.EntityProjectile;
-import net.minecraft.core.item.ItemStack;
 import net.minecraft.core.sound.SoundCategory;
 import net.minecraft.core.util.helper.DamageType;
 import net.minecraft.core.util.helper.MathHelper;
-import net.minecraft.core.util.phys.AABB;
-import net.minecraft.core.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,9 +29,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
-import java.util.List;
-
-import static net.minecraft.client.render.colorizer.Colorizers.mc;
 import static net.minecraft.core.util.helper.MathHelper.clamp;
 
 //this one is huge..
@@ -68,30 +59,57 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 	@Unique
 	public EntityLiving thisObject = (EntityLiving)(Object)this ;
 
+	@Unique
+	public int parryTicks;
 
 	@Unique
-	private int parryTicks;
+	public int lastParryTicks;
 
 	@Unique
-	private int parriedTicks = 0;
+	public int lastParryDelay = -1;
+	@Unique
+	public boolean lastParryAccurate;
 
 	@Unique
-	private int extraJumps = 0;
+	public int parriedTicks = 0;
 
 	@Unique
-	private int doublejumpTimer = 0;
+	public int extraJumps = 0;
 
 	@Unique
-	private Minecraft mc = Minecraft.getMinecraft(Minecraft.class);
+	public int doublejumpTimer = 0;
 
 	@Unique
-	private Entity currentParryAttacker;
+	public int evilEyeCounter = 0;
 
 	@Unique
-	private int currentHurtDamage;
+	public final Minecraft mc = Minecraft.getMinecraft(Minecraft.class);
+
+	@Unique
+	public Entity currentParryAttacker;
+
+	@Unique
+	public int currentHurtDamage;
+
+	@Unique
+	public int getInventorySlotContainItemDX(EntityPlayer ply, int i) {
+		for (int j = 0; j < ply.inventory.mainInventory.length; ++j) {
+			if (ply.inventory.mainInventory[j] == null || ply.inventory.mainInventory[j].itemID != i) continue;
+			return j;
+		}
+		return -1;
+	}
 
 	public boolean dxiimod$getIsJumping(){
 		return this.isJumping;
+	}
+
+	public void dxiimod$evileyeheal(){
+		evilEyeCounter++;
+		if(evilEyeCounter == 2){
+			thisObject.heal(1);
+			evilEyeCounter = 0;
+		}
 	}
 
 	/**
@@ -112,79 +130,36 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 	}
 
 	//parrying stuff
-	@Unique
-	public void parryHitbox(World world, EntityPlayer player){
-		/*
-		this function was moved here from parrying
-		shield item because Useful told me that each
-		item is a singleton, so i had to get rid of every
-		timer and timed event
-		*/
-
-		double bound = 1.75;
-		AABB aabb1 = new AABB(
-			player.x - bound,
-			player.y + player.getHeadHeight() - bound,
-			player.z - bound,
-			player.x  + bound,
-			player.y + player.getHeadHeight() + bound,
-			player.z + bound
-		);
-
-		player.swingItem();
-		world.playSoundAtEntity(player, player, "dxiimod.shield_swing", 0.3f, 1.0f);
-
-		List<Entity> projectileList = player.world.getEntitiesWithinAABB(EntityProjectile.class, aabb1 );
-		for (Entity entity : projectileList) {
-			if(entity instanceof EntityArrow) {
-				if( ((EntityArrow)entity).isGrounded() ){
-					return;
-				}
-				((EntityArrow)entity).damage = 8;
-			}
-
-			world.spawnParticle("largesmoke", entity.x, entity.y, entity.z, 0.0, 0.0, 0.0, 0);
-			world.playSoundAtEntity(player, player, "dxiimod.shield_bash", 0.66f, 1.0f);
-
-			float f = .4f;
-			entity.setRot(player.yRot, player.xRot);
-
-			entity.xd = -MathHelper.sin(entity.yRot / 180.0f * (float)Math.PI) * MathHelper.cos(entity.xRot / 180.0f * (float)Math.PI) * f;
-			entity.zd = MathHelper.cos(entity.yRot / 180.0f * (float)Math.PI) * MathHelper.cos(entity.xRot / 180.0f * (float)Math.PI) * f;
-			entity.yd = -MathHelper.sin(entity.xRot / 180.0f * (float)Math.PI) * f;
-
-			((EntityProjectile)entity).setHeading(entity.xd, entity.yd, entity.zd, .1f, 1.0f);
-
-			double pushX = player.getLookAngle().xCoord + Math.random() * .05;
-			double pushY = player.getLookAngle().yCoord + Math.random() * .05;
-			double pushZ = player.getLookAngle().zCoord + Math.random() * .05;
-			entity.push(pushX * 1.2, pushY * 1.2, pushZ * 1.2);
-
-			int bucklerId = getInventorySlotContainItemDX(((EntityPlayer)thisObject), dxiimodItems.shieldBuckler.id);
-			((EntityPlayer)thisObject).inventory.mainInventory[bucklerId].damageItem(1, thisObject);
-		}
-	}
-
 	//adds parrying ticks to an entity
 	@Override
-	public void dxiimod$Parry(int parryTicks){
-		this.parryTicks = parryTicks;
+	public void dxiimod$Parry(int parryTicks, int delay, boolean accurate){
+		this.parryTicks = parryTicks + delay;
+		this.lastParryTicks = parryTicks + delay;
+		this.lastParryDelay = delay;
+		this.lastParryAccurate = accurate;
+
+		if(thisObject instanceof EntityPlayer) {
+			((EntityPlayer)thisObject).swingItem();
+			thisObject.world.playSoundAtEntity(thisObject, thisObject, "dxiimod.shield_swing", 0.3f, 1.0f);
+		}
+
+
 	}
 
-	//stuns entityLiving if it tries to hurt an entity with parrying ticks
+	//previously stunned an enemy on successful parry, will still do tho but for new enemies
 	@Override
 	public void dxiimod$parryStun(Entity attacker, int damage){
 		if(thisObject instanceof EntityPlayer) {
-			this.parriedTicks = 12;
+			this.parriedTicks = 50;
 		}else{
-			this.parriedTicks = 20;
+			this.parriedTicks = 24;
 		}
 
 		double d = clamp(attacker.x - thisObject.x, -1, 1);
 		double d1 = clamp(attacker.z - thisObject.z, -1, 1);
 		attacker.push(d*4 , .3, d1*4);
 
-		if(damage  >= 5){
+		if(damage  >= 20){ //play cooler sound if the damage is nutzzzz
 			attacker.world.playSoundEffect(
 				attacker,
 				SoundCategory.ENTITY_SOUNDS,
@@ -218,17 +193,6 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 		return parriedTicks;
 	}
 
-
-	//i could use an accessor but just copied code lol (i hate you incapsulation)
-	@Unique
-	public int getInventorySlotContainItemDX(EntityPlayer ply, int i) {
-		for (int j = 0; j < ply.inventory.mainInventory.length; ++j) {
-			if (ply.inventory.mainInventory[j] == null || ply.inventory.mainInventory[j].itemID != i) continue;
-			return j;
-		}
-		return -1;
-	}
-
 	//arent used atm
 	@Inject(
 		method = "hurt(Lnet/minecraft/core/entity/Entity;ILnet/minecraft/core/util/helper/DamageType;)Z",
@@ -247,15 +211,24 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 		cancellable = true)
 	public void parryStunOnHurt(Entity attacker, int damage, DamageType type, CallbackInfoReturnable<Boolean> cir){
 		if(attacker != null) {
-			if (type == DamageType.COMBAT && (this.parryTicks >= 10 & this.parryTicks <= 16) && thisObject.distanceTo(attacker) <= 3) {
-				int bucklerId = getInventorySlotContainItemDX(((EntityPlayer)thisObject), dxiimodItems.shieldBuckler.id);
-				((EntityPlayer)thisObject).inventory.mainInventory[bucklerId].damageItem(1, thisObject);
+
+			if (dxiimodUtils.isEntityInFront((EntityLiving)attacker, thisObject) && type == DamageType.COMBAT && (this.parryTicks > 0 && this.parryTicks <= this.lastParryTicks - this.lastParryDelay) && thisObject.distanceTo(attacker) <= 3) {
+				if(thisObject instanceof EntityPlayer) {
+					int bucklerId = getInventorySlotContainItemDX(((EntityPlayer) thisObject), dxiimodItems.shieldBuckler.id);
+					((EntityPlayer) thisObject).inventory.mainInventory[bucklerId].damageItem(1, thisObject);
+				}
+
 				((ILivingEntityFunctions) (attacker)).dxiimod$parryStun(attacker, damage);
+
 				cir.setReturnValue(false);
+			}else{
+				if(attacker instanceof EntityPlayer) {
+					System.out.println("Ouch!! you hit me with " + damage + " damage!");
+				}
 			}
 
 			if (this.parriedTicks > 0) {
-				attacker.world.playSoundEffect(attacker, SoundCategory.ENTITY_SOUNDS, attacker.x, attacker.y, attacker.z, "dxiimod.riposte", .1f, 1f);
+				attacker.world.playSoundEffect(attacker, SoundCategory.ENTITY_SOUNDS, attacker.x, attacker.y, attacker.z, "dxiimod.riposte", .35f, 1f);
 			}
 		}
 	}
@@ -267,16 +240,18 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 		at = @At(value = "INVOKE", target = "net/minecraft/core/entity/EntityLiving.onLivingUpdate ()V")
 	)
 	public void tickMixin(CallbackInfo ci){
-		if(this.parryTicks == 18 & thisObject instanceof EntityPlayer){
-			parryHitbox(thisObject.world, (EntityPlayer)thisObject);
+		if(this.parryTicks == this.lastParryTicks - this.lastParryDelay & thisObject instanceof EntityPlayer){
+			dxiimodUtils.parryHitbox(thisObject, this.lastParryAccurate);
 		}
 
 		if(this.oldMoveSpeed == 0){
 			this.oldMoveSpeed = this.moveSpeed;
 		}
+
 		if(this.parryTicks != 0) {
 			this.parryTicks--;
 		}
+
 		if(this.parriedTicks != 0){
 			this.parriedTicks--;
 		}
@@ -305,16 +280,8 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 		}
 
 
-		//slows down parried target
-		if(parriedTicks != 0){
-			this.moveSpeed = oldMoveSpeed * .33f;
-		}else{
-			this.moveSpeed = oldMoveSpeed;
-		}
 
-		if(this.evilEyeTimer != 0){
-			this.evilEyeTimer--;
-		}
+
 
 		if(this.moanTimer != 0){
 			this.moanTimer--;
@@ -337,44 +304,10 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 
 	//double jumping and frog leg accessory checks
 		if(thisObject instanceof EntityPlayer) {
-			boolean FF = false;
-			boolean DJ = false;
+			boolean FF = dxiimodUtils.playerHasAccessoryEffect((EntityPlayer) thisObject, EAccBonus.FEATHERFALL);;
+			boolean DJ = dxiimodUtils.playerHasAccessoryEffect((EntityPlayer) thisObject, EAccBonus.DOUBLEJUMP);
 			double jumpMul = 1;
-
-			ItemStack[] accInv = ( (IPlayerInventory) ( ( (EntityPlayer) thisObject ).inventory) ).dxiimod$getAccInv();
-			if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.DOUBLEJUMP) {
-				DJ = true;
-			}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.DOUBLEJUMP) {
-				DJ = true;
-			}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.DOUBLEJUMP) {
-				DJ = true;
-			}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.DOUBLEJUMP) {
-				DJ = true;
-			}
-
-			if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.FROGLEG) {
-				bigJump = true;
-			}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.FROGLEG) {
-				bigJump = true;
-			}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.FROGLEG) {
-				bigJump = true;
-			}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.FROGLEG) {
-				bigJump = true;
-			}else{
-				bigJump = false;
-			}
-
-			if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.FEATHERFALL) {
-				FF = true;
-			}else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.FEATHERFALL) {
-				FF = true;
-			}else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.FEATHERFALL) {
-				FF = true;
-			}else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.FEATHERFALL) {
-				FF = true;
-			}
-
-
+			bigJump = dxiimodUtils.playerHasAccessoryEffect((EntityPlayer) thisObject, EAccBonus.FROGLEG);
 
 			if(bigJump){
 				jumpMul = 1.5;
@@ -386,7 +319,7 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 
 				thisObject.yd = .42 * jumpMul;
 
-				float jumpPush = (float)jumpMul/4;
+				float jumpPush = (float)jumpMul/8;
 
 				if(this.mc.gameSettings.keyForward.isPressed() && this.mc.gameSettings.keyLeft.isPressed()
 					|| this.mc.gameSettings.keyForward.isPressed() && this.mc.gameSettings.keyRight.isPressed()
@@ -467,46 +400,31 @@ public class EntityLivingMixin implements ILivingEntityFunctions {
 		}
 	}
 
-	@Unique
-	private int evilEyeTimer = 0;
+
 
 	// evil eye ring and souls drops from mobs (everything that extends EntityAnimal or EntityMonster)
 	@Inject(
 		method = "onDeath(Lnet/minecraft/core/entity/Entity;)V",
 		at = @At(value = "TAIL"))
 	public void evilEyeAndSouls(Entity entityKilledBy, CallbackInfo ci) {
-
-		if(thisObject instanceof EntityMonster){
-			if(Math.random() <= .5){
-				thisObject.spawnAtLocation(dxiimodItems.soulevil.id, 1);
+		if(entityKilledBy instanceof EntityPlayer && dxiimodMain.PLY_SOULS) {
+			if (thisObject instanceof EntityMonster) {
+				if (Math.random() <= .5) {
+					thisObject.spawnAtLocation(dxiimodItems.soulevil.id, 1);
+				}
 			}
-		}
 
-		if(thisObject instanceof EntityAnimal){
-			if(Math.random() <= .5){
-				thisObject.spawnAtLocation(dxiimodItems.soulpeace.id, 1);
+			if (thisObject instanceof EntityAnimal) {
+				if (Math.random() <= .5) {
+					thisObject.spawnAtLocation(dxiimodItems.soulpeace.id, 1);
+				}
 			}
 		}
 
 		//evil eye stuff
-
-		if(entityKilledBy instanceof EntityPlayer && this.evilEyeTimer == 0){
-			this.evilEyeTimer = 15;
-			boolean EE = false;
-
-			ItemStack[] accInv = ((IPlayerInventory) (((EntityPlayer) entityKilledBy).inventory)).dxiimod$getAccInv();
-			if (accInv[0] != null && ((baseAccessory) (accInv[0].getItem())).bonus == EAccBonus.EVILEYE) {
-				EE = true;
-			} else if (accInv[1] != null && ((baseAccessory) (accInv[1].getItem())).bonus == EAccBonus.EVILEYE) {
-				EE = true;
-			} else if (accInv[2] != null && ((baseAccessory) (accInv[2].getItem())).bonus == EAccBonus.EVILEYE) {
-				EE = true;
-			} else if (accInv[3] != null && ((baseAccessory) (accInv[3].getItem())).bonus == EAccBonus.EVILEYE) {
-				EE = true;
-			}
-
-			if (EE) {
-				((EntityPlayer) entityKilledBy).heal(1);
+		if(entityKilledBy instanceof EntityPlayer){
+			if (dxiimodUtils.playerHasAccessoryEffect((EntityPlayer)entityKilledBy, EAccBonus.EVILEYE)) {
+				((ILivingEntityFunctions) entityKilledBy).dxiimod$evileyeheal();
 			}
 		}
 	}

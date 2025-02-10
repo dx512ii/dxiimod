@@ -5,12 +5,13 @@ dxiimod.category.fog=The Fog
 dxiimod.category.keybinds=Keyboard
 options.dxiimod.fog=The Fog distance (1-6)
 dxiimod.dodge=Dodge
+dxiimod.parry=Parry
 
 item.dxiimod.BUCKLER.name=Parrying shield
 item.dxiimod.BUCKLER.desc=A simple item containing incredible power, allows to parry incoming attacks, parried enemies receive more damage.
 
 item.dxiimod.SUSP_TOTEM.name=Suspiciously looking totem
-item.dxiimod.SUSP_TOTEM.desc=Strange wooden totem.
+item.dxiimod.SUSP_TOTEM.desc=I cant remember making it, i shouldn't use it if i don't want to deal with consequences.
 
 item.dxiimod.THROWING_DAGGER.name=Throwing Dagger
 item.dxiimod.THROWING_DAGGER.desc=Primitive throwable dagger, useless in close combat but quite useful when thrown. Pierces multiple targets. Has limited melee range.
@@ -111,7 +112,7 @@ item.dxiimod.FEATHERFALL.name=Featherfall necklace
 item.dxiimod.FEATHERFALL.desc=Allows wearer to fall slower
 
 item.dxiimod.EVILEYERING.name=Ring of the Evil Eye
-item.dxiimod.EVILEYERING.desc=Heals player a small amount for each enemy killed
+item.dxiimod.EVILEYERING.desc=Heals player a small amount for each 2nd enemy killed.
 
 item.dxiimod.CHERRYWOODRING.name=Cherry Wood Grain Ring
 item.dxiimod.CHERRYWOODRING.desc=Can be used to slow the loss of items durability. 66% chance to not spend item durability.
